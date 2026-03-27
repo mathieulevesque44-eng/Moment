@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moment</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(90deg, #7c5cff 0%, #8db6ff 50%, #94e7ef 100%);
+      min-height: 100vh;
+      color: #eefcff;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 22px 18px 36px;
+    }
+
+    .hidden { display: none !important; }
+
+    .screen {
+      min-height: calc(100vh - 58px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .title {
+      font-size: 68px;
+      line-height: 0.95;
+      font-weight: 900;
+      text-align: center;
+      margin: 42px 0 18px;
+      color: #eefcff;
+      text-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 19px;
+      font-weight: 800;
+      margin: 0 0 70px;
+      color: #eefcff;
+      text-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+    }
+
+    .screen-heading {
+      font-size: 58px;
+      line-height: 0.95;
+      font-weight: 900;
+      margin: 10px 0 20px;
+      color: #eefcff;
+      text-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      letter-spacing: 0.5px;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn,
+    .small-btn {
+      border: 3px solid #6f47ff;
+      background: rgba(223, 245, 248, 0.95);
+      color: #6f47ff;
+      border-radius: 18px;
+      padding: 10px 14px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(53, 31, 140, 0.12);
+    }
+
+    .main-actions {
+      margin-top: auto;
+      margin-bottom: 95px;
+    }
+
+    .big-btn {
+      width: 100%;
+      border: 4px solid #6f47ff;
+      background: rgba(223, 245, 248, 0.95);
+      color: #6f47ff;
+      border-radius: 28px;
+      padding: 23px 18px;
+      font-size: 30px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(53, 31, 140, 0.16);
+      margin-bottom: 28px;
+    }
+
+    .big-btn:last-child { margin-bottom: 0; }
+
+    .form-card,
+    .moment-list-card,
+    .detail-card,
+    .description-card {
+      background: rgba(223, 245, 248, 0.96);
+      border: 4px solid #6f47ff;
+      border-radius: 30px;
+      box-shadow: 0 12px 24px rgba(53, 31, 140, 0.16);
+    }
+
+    .form-card {
+      padding: 18px 16px 22px;
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      color: #6f47ff;
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      border: 4px solid #7a58ff;
+      border-radius: 22px;
+      padding: 14px 16px;
+      font-size: 17px;
+      background: #f6f6f6;
+      color: #3a2a78;
+      outline: none;
+      font-family: Arial, sans-serif;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .photos-label {
+      color: #6f47ff;
+      font-size: 22px;
+      font-weight: 900;
+      text-align: center;
+      margin: 6px 0 14px;
+    }
+
+    .photo-picker-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .photo-picker {
+      width: 110px;
+      height: 110px;
+      border-radius: 28px;
+      border: 4px solid #7a58ff;
+      background: #f6f6f6;
+      color: #6f47ff;
+      font-size: 68px;
+      font-weight: 900;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+    }
+
+    #photoInput { display: none; }
+
+    .thumbs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .thumb-wrap {
+      position: relative;
+      background: #ffffff;
+      border: 3px solid #7a58ff;
+      border-radius: 18px;
+      overflow: hidden;
+      padding-bottom: 10px;
+    }
+
+    .thumbs img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+      background: #fff;
+    }
+
+    .thumb-actions {
+      padding: 8px 8px 0;
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    .cover-btn,
+    .cover-btn-active {
+      border: 2px solid #6f47ff;
+      border-radius: 14px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .cover-btn {
+      background: #f6f6f6;
+      color: #6f47ff;
+    }
+
+    .cover-btn-active {
+      background: #6f47ff;
+      color: #ffffff;
+    }
+
+    .remove-photo-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      border: 2px solid #6f47ff;
+      border-radius: 999px;
+      background: #ffdede;
+      color: #6f47ff;
+      font-weight: 900;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .moment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 4px;
+    }
+
+    .moment-list-card {
+      overflow: hidden;
+      cursor: pointer;
+      color: #6f47ff;
+    }
+
+    .moment-list-cover {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      border-bottom: 4px solid #6f47ff;
+      background: #fff;
+    }
+
+    .moment-list-no-cover {
+      width: 100%;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 4px solid #6f47ff;
+      background: #fff;
+      color: #6f47ff;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .moment-list-body {
+      padding: 16px 18px 18px;
+    }
+
+    .moment-list-title {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      line-height: 1.05;
+    }
+
+    .moment-list-date {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .empty {
+      text-align: center;
+      color: #eefcff;
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 40px;
+      text-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+    }
+
+    .detail-card {
+      overflow: hidden;
+      margin-bottom: 18px;
+      color: #6f47ff;
+    }
+
+    .detail-top {
+      padding: 18px 18px 14px;
+      text-align: center;
+    }
+
+    .detail-title {
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .detail-date {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .detail-cover {
+      width: 100%;
+      height: 290px;
+      object-fit: cover;
+      display: block;
+      border-top: 4px solid #6f47ff;
+      background: #fff;
+    }
+
+    .detail-no-cover {
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      border-top: 4px solid #6f47ff;
+      background: #fff;
+      color: #6f47ff;
+    }
+
+    .description-card {
+      padding: 18px;
+      color: #6f47ff;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .gallery img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 22px;
+      border: 4px solid #6f47ff;
+      background: #fff;
+      box-shadow: 0 12px 24px rgba(53, 31, 140, 0.16);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .action-row button {
+      flex: 1;
+    }
+
+    .danger-btn,
+    .edit-btn {
+      width: 100%;
+      border: 4px solid #6f47ff;
+      border-radius: 28px;
+      padding: 18px 16px;
+      font-size: 22px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(53, 31, 140, 0.16);
+    }
+
+    .danger-btn {
+      background: #ffdede;
+      color: #6f47ff;
+    }
+
+    .edit-btn {
+      background: rgba(223, 245, 248, 0.95);
+      color: #6f47ff;
+    }
+
+    @media (max-width: 390px) {
+      .title { font-size: 58px; }
+      .screen-heading { font-size: 48px; }
+      .big-btn { font-size: 26px; }
+      .moment-list-title, .detail-title { font-size: 26px; }
+      .description-card { font-size: 20px; }
+      .action-row { flex-direction: column; }
+      .thumbs { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="homeScreen" class="screen">
+      <h1 class="title">MOMENT</h1>
+      <p class="subtitle">Capture what matters</p>
+
+      <div class="main-actions">
+        <button class="big-btn" onclick="goToCreate()">Create Moment</button>
+        <button class="big-btn" onclick="goToCollection()">My Moments</button>
+      </div>
+    </section>
+
+    <section id="createScreen" class="screen hidden">
+      <div class="top-row">
+        <button class="back-btn" onclick="handleCreateBack()">Back</button>
+      </div>
+
+      <h2 id="createHeading" class="screen-heading">Create Moment</h2>
+
+      <div class="form-card">
+        <div class="field">
+          <label for="title">Title</label>
+          <input id="title" type="text" placeholder="Road Trip Gaspésie" />
+        </div>
+
+        <div class="field">
+          <label for="date">Date</label>
+          <input id="date" type="date" />
+        </div>
+
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="What made this moment special?"></textarea>
+        </div>
+
+        <div class="photos-label" id="photoCountLabel">Select your best photos 0/20</div>
+
+        <div class="photo-picker-wrap">
+          <label for="photoInput" class="photo-picker">+</label>
+          <input id="photoInput" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" multiple />
+        </div>
+
+        <div id="thumbs" class="thumbs"></div>
+      </div>
+
+      <button id="saveBtn" class="big-btn" onclick="saveMoment()">Save Moment</button>
+    </section>
+
+    <section id="collectionScreen" class="screen hidden">
+      <div class="top-row">
+        <button class="back-btn" onclick="goHome()">Back</button>
+      </div>
+
+      <h2 class="screen-heading">My Moments</h2>
+
+      <div id="momentList" class="moment-list"></div>
+      <div id="emptyState" class="empty hidden">No moments yet.</div>
+    </section>
+
+    <section id="detailScreen" class="screen hidden">
+      <div class="top-row">
+        <button class="back-btn" onclick="goToCollection()">Back</button>
+      </div>
+
+      <div id="detailContent"></div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "moment_app_data_v3";
+    let moments = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    let selectedPhotos = [];
+    let selectedMomentId = null;
+    let editingMomentId = null;
+    let selectedCoverIndex = 0;
+
+    const homeScreen = document.getElementById("homeScreen");
+    const createScreen = document.getElementById("createScreen");
+    const collectionScreen = document.getElementById("collectionScreen");
+    const detailScreen = document.getElementById("detailScreen");
+
+    const photoInput = document.getElementById("photoInput");
+    const thumbs = document.getElementById("thumbs");
+    const photoCountLabel = document.getElementById("photoCountLabel");
+    const createHeading = document.getElementById("createHeading");
+    const saveBtn = document.getElementById("saveBtn");
+
+    function hideAllScreens() {
+      homeScreen.classList.add("hidden");
+      createScreen.classList.add("hidden");
+      collectionScreen.classList.add("hidden");
+      detailScreen.classList.add("hidden");
+    }
+
+    function goHome() {
+      hideAllScreens();
+      homeScreen.classList.remove("hidden");
+    }
+
+    function goToCreate() {
+      editingMomentId = null;
+      createHeading.textContent = "Create Moment";
+      saveBtn.textContent = "Save Moment";
+      resetCreateForm();
+      hideAllScreens();
+      createScreen.classList.remove("hidden");
+    }
+
+    function handleCreateBack() {
+      if (editingMomentId) {
+        goToDetail(editingMomentId);
+      } else {
+        goHome();
+      }
+    }
+
+    function goToCollection() {
+      hideAllScreens();
+      collectionScreen.classList.remove("hidden");
+      renderCollection();
+    }
+
+    function goToDetail(id) {
+      selectedMomentId = id;
+      hideAllScreens();
+      detailScreen.classList.remove("hidden");
+      renderDetail();
+    }
+
+    function saveToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(moments));
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "No date";
+      const date = new Date(dateStr + "T00:00:00");
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function resetCreateForm() {
+      document.getElementById("title").value = "";
+      document.getElementById("date").value = "";
+      document.getElementById("description").value = "";
+      photoInput.value = "";
+      selectedPhotos = [];
+      selectedCoverIndex = 0;
+      renderThumbs();
+    }
+
+    function setCover(index) {
+      selectedCoverIndex = index;
+      renderThumbs();
+    }
+
+    function renderThumbs() {
+      thumbs.innerHTML = "";
+      photoCountLabel.textContent = `Select your best photos ${selectedPhotos.length}/20`;
+
+      selectedPhotos.forEach((src, index) => {
+        const wrap = document.createElement("div");
+        wrap.className = "thumb-wrap";
+
+        const isCover = index === selectedCoverIndex;
+
+        wrap.innerHTML = `
+          <img src="${src}" alt="">
+          <button class="remove-photo-btn" type="button" onclick="removePhoto(${index})">×</button>
+          <div class="thumb-actions">
+            <button
+              type="button"
+              class="${isCover ? "cover-btn-active" : "cover-btn"}"
+              onclick="setCover(${index})"
+            >
+              ${isCover ? "Cover Selected" : "Set as Cover"}
+            </button>
+          </div>
+        `;
+
+        thumbs.appendChild(wrap);
+      });
+    }
+
+    function removePhoto(index) {
+      selectedPhotos.splice(index, 1);
+
+      if (selectedPhotos.length === 0) {
+        selectedCoverIndex = 0;
+      } else if (selectedCoverIndex > index) {
+        selectedCoverIndex -= 1;
+      } else if (selectedCoverIndex === index) {
+        selectedCoverIndex = 0;
+      }
+
+      renderThumbs();
+    }
+
+    photoInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+
+      const remainingSlots = 20 - selectedPhotos.length;
+      const allowedFiles = files.slice(0, remainingSlots);
+
+      for (const file of allowedFiles) {
+        const base64 = await fileToBase64(file);
+        selectedPhotos.push(base64);
+      }
+
+      if (files.length > remainingSlots) {
+        alert("Maximum 20 photos per moment.");
+      }
+
+      renderThumbs();
+      photoInput.value = "";
+    });
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getCoverPhoto(moment) {
+      if (!moment.photos || !moment.photos.length) return "";
+      const index = typeof moment.coverIndex === "number" ? moment.coverIndex : 0;
+      return moment.photos[index] || moment.photos[0] || "";
+    }
+
+    function getGalleryPhotos(moment) {
+      if (!moment.photos || !moment.photos.length) return [];
+      const cover = getCoverPhoto(moment);
+      return moment.photos.filter((src, index) => {
+        const coverIndex = typeof moment.coverIndex === "number" ? moment.coverIndex : 0;
+        return index !== coverIndex;
+      });
+    }
+
+    function saveMoment() {
+      const title = document.getElementById("title").value.trim();
+      const date = document.getElementById("date").value;
+      const description = document.getElementById("description").value.trim();
+
+      if (!title) {
+        alert("Please add a title.");
+        return;
+      }
+
+      const safeCoverIndex =
+        selectedPhotos.length === 0
+          ? 0
+          : Math.min(selectedCoverIndex, selectedPhotos.length - 1);
+
+      if (editingMomentId) {
+        const index = moments.findIndex((m) => m.id === editingMomentId);
+        if (index !== -1) {
+          moments[index] = {
+            ...moments[index],
+            title,
+            date,
+            description,
+            photos: [...selectedPhotos],
+            coverIndex: safeCoverIndex
+          };
+          saveToStorage();
+          goToDetail(editingMomentId);
+          editingMomentId = null;
+          createHeading.textContent = "Create Moment";
+          saveBtn.textContent = "Save Moment";
+          return;
+        }
+      }
+
+      const newMoment = {
+        id: Date.now(),
+        title,
+        date,
+        description,
+        photos: [...selectedPhotos],
+        coverIndex: safeCoverIndex
+      };
+
+      moments.unshift(newMoment);
+      saveToStorage();
+      resetCreateForm();
+      goToCollection();
+    }
+
+    function editMoment(id) {
+      const moment = moments.find((m) => m.id === id);
+      if (!moment) return;
+
+      editingMomentId = id;
+      createHeading.textContent = "Edit Moment";
+      saveBtn.textContent = "Update Moment";
+
+      document.getElementById("title").value = moment.title || "";
+      document.getElementById("date").value = moment.date || "";
+      document.getElementById("description").value = moment.description || "";
+      selectedPhotos = [...(moment.photos || [])];
+      selectedCoverIndex = typeof moment.coverIndex === "number" ? moment.coverIndex : 0;
+      renderThumbs();
+
+      hideAllScreens();
+      createScreen.classList.remove("hidden");
+    }
+
+    function renderCollection() {
+      const list = document.getElementById("momentList");
+      const empty = document.getElementById("emptyState");
+      list.innerHTML = "";
+
+      if (!moments.length) {
+        empty.classList.remove("hidden");
+        return;
+      }
+
+      empty.classList.add("hidden");
+
+      moments.forEach((moment) => {
+        const card = document.createElement("div");
+        card.className = "moment-list-card";
+        card.onclick = () => goToDetail(moment.id);
+
+        const coverPhoto = getCoverPhoto(moment);
+
+        const cover = coverPhoto
+          ? `<img class="moment-list-cover" src="${coverPhoto}" alt="${moment.title}">`
+          : `<div class="moment-list-no-cover">No photo</div>`;
+
+        card.innerHTML = `
+          ${cover}
+          <div class="moment-list-body">
+            <div class="moment-list-title">${moment.title}</div>
+            <div class="moment-list-date">${formatDate(moment.date)}</div>
+          </div>
+        `;
+
+        list.appendChild(card);
+      });
+    }
+
+    function renderDetail() {
+      const detail = document.getElementById("detailContent");
+      const moment = moments.find((m) => m.id === selectedMomentId);
+
+      if (!moment) {
+        detail.innerHTML = `<div class="empty">Moment not found.</div>`;
+        return;
+      }
+
+      const coverPhoto = getCoverPhoto(moment);
+      const galleryPhotos = getGalleryPhotos(moment);
+
+      const cover = coverPhoto
+        ? `<img class="detail-cover" src="${coverPhoto}" alt="${moment.title}">`
+        : `<div class="detail-no-cover">No photo</div>`;
+
+      const gallery = galleryPhotos.length
+        ? `
+          <div class="gallery">
+            ${galleryPhotos.map((src) => `<img src="${src}" alt="">`).join("")}
+          </div>
+        `
+        : "";
+
+      detail.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-top">
+            <div class="detail-title">${moment.title}</div>
+            <div class="detail-date">${formatDate(moment.date)}</div>
+          </div>
+          ${cover}
+        </div>
+
+        <div class="description-card">
+          ${moment.description || "No description for this moment."}
+        </div>
+
+        ${gallery}
+
+        <div class="action-row">
+          <button class="edit-btn" onclick="editMoment(${moment.id})">Edit Moment</button>
+          <button class="danger-btn" onclick="deleteMoment(${moment.id})">Delete</button>
+        </div>
+      `;
+    }
+
+    function deleteMoment(id) {
+      moments = moments.filter((m) => m.id !== id);
+      saveToStorage();
+      if (editingMomentId === id) {
+        editingMomentId = null;
+      }
+      goToCollection();
+    }
+
+    goHome();
+  </script>
+</body>
+</html>
